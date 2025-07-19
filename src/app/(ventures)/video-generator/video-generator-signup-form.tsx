@@ -22,7 +22,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Wand2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 const formSchema = z.object({
@@ -70,7 +70,6 @@ export function VideoGeneratorSignupForm({ open, onOpenChange }: VideoGeneratorS
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle className="font-headline text-2xl">Generate Your Video Script</DialogTitle>
@@ -141,6 +140,5 @@ export function VideoGeneratorSignupForm({ open, onOpenChange }: VideoGeneratorS
           </ScrollArea>
         </div>
       </DialogContent>
-    </Dialog>
   );
 }

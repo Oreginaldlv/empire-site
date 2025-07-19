@@ -1,8 +1,26 @@
 
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Film } from 'lucide-react';
 import { VideoGeneratorSignupForm } from '../video-generator-signup-form';
+import { Dialog } from '@/components/ui/dialog';
 
 export default function VideoGeneratorSignupPage() {
+  const [open, setOpen] = useState(true);
+  const router = useRouter();
+
+  const handleOpenChange = (isOpen: boolean) => {
+    if (!isOpen) {
+      setOpen(false);
+      // Allow time for the dialog to close before navigating
+      setTimeout(() => {
+        router.push('/video-generator');
+      }, 200);
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="mx-auto max-w-3xl text-center">
@@ -15,7 +33,9 @@ export default function VideoGeneratorSignupPage() {
         </p>
       </div>
       <div className="mx-auto mt-12 max-w-4xl">
-        <VideoGeneratorSignupForm />
+        <Dialog open={open} onOpenChange={handleOpenChange}>
+          <VideoGeneratorSignupForm open={open} onOpenChange={handleOpenChange} />
+        </Dialog>
       </div>
     </div>
   );
