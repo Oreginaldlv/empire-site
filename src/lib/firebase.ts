@@ -15,32 +15,15 @@ const firebaseConfig = {
 let app: FirebaseApp;
 let auth: Auth;
 let db: Firestore;
-let firebaseEnabled = false;
 
-// Check if all required environment variables are present
-if (
-  firebaseConfig.apiKey &&
-  firebaseConfig.authDomain &&
-  firebaseConfig.projectId
-) {
-    if (!getApps().length) {
-        app = initializeApp(firebaseConfig);
-    } else {
-        app = getApp();
-    }
-    auth = getAuth(app);
-    db = getFirestore(app);
-    firebaseEnabled = true;
+
+if (!getApps().length) {
+    app = initializeApp(firebaseConfig);
 } else {
-    console.warn("Firebase configuration is incomplete. Firebase services will be disabled.");
-    // Provide no-op or placeholder objects if Firebase is not configured
-    app = {} as FirebaseApp;
-    auth = {} as Auth;
-    db = {} as Firestore;
+    app = getApp();
 }
+auth = getAuth(app);
+db = getFirestore(app);
 
-export function isFirebaseEnabled() {
-    return firebaseEnabled;
-}
 
 export { app, auth, db };

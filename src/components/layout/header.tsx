@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/logo';
 import { useAuth } from '@/hooks/use-auth';
-import { signOut } from '@/lib/firebase/auth';
+import { signOut as firebaseSignOut } from '@/lib/firebase/auth';
 import { useRouter } from 'next/navigation';
 
 export default function Header() {
@@ -13,7 +13,7 @@ export default function Header() {
   const router = useRouter();
 
   const handleLogout = async () => {
-    await signOut();
+    await firebaseSignOut();
     router.push('/');
   };
   
