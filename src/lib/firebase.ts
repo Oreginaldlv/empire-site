@@ -1,5 +1,7 @@
+
 import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
 import { getAuth, type Auth } from 'firebase/auth';
+import { getFirestore, type Firestore } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -12,16 +14,14 @@ const firebaseConfig = {
 
 let app: FirebaseApp;
 let auth: Auth;
+let db: Firestore;
 let firebaseEnabled = false;
 
 // Check if all required environment variables are present
 if (
   firebaseConfig.apiKey &&
   firebaseConfig.authDomain &&
-  firebaseConfig.projectId &&
-  firebaseConfig.storageBucket &&
-  firebaseConfig.messagingSenderId &&
-  firebaseConfig.appId
+  firebaseConfig.projectId
 ) {
     if (!getApps().length) {
         app = initializeApp(firebaseConfig);
@@ -29,16 +29,18 @@ if (
         app = getApp();
     }
     auth = getAuth(app);
+    db = getFirestore(app);
     firebaseEnabled = true;
 } else {
     console.warn("Firebase configuration is incomplete. Firebase services will be disabled.");
     // Provide no-op or placeholder objects if Firebase is not configured
     app = {} as FirebaseApp;
     auth = {} as Auth;
+    db = {} as Firestore;
 }
 
 export function isFirebaseEnabled() {
     return firebaseEnabled;
 }
 
-export { app, auth };
+export { app, auth, db };

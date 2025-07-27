@@ -6,12 +6,12 @@ import {
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
   onAuthStateChanged as firebaseOnAuthStateChanged,
-  getAuth,
   type User,
 } from 'firebase/auth';
-import { app, isFirebaseEnabled, auth } from '../firebase';
+import { auth, isFirebaseEnabled } from '../firebase';
+import { createUserProfile } from './firestore';
 
-export async function signUpUser(email, password) {
+export async function signUpUser(email, password, venture, additionalData = {}) {
   if (!isFirebaseEnabled()) {
     console.warn('Firebase is not configured. Sign up is disabled.');
     return { result: null, error: { message: 'Firebase is not configured.'} };
@@ -21,6 +21,13 @@ export async function signUpUser(email, password) {
     error = null;
   try {
     result = await createUserWithEmailAndPassword(auth, email, password);
+    if (result.user) {
+      await createUserProfile(result.user.uid, {
+        email,
+        venture,
+        ...additionalData
+      });
+    }
   } catch (e) {
     error = e;
   }
@@ -47,17 +54,14 @@ export async function signInUser(email, password) {
 export async function signOut() {
   if (!isFirebaseEnabled()) {
     console.warn('Firebase is not configured. Sign out is disabled.');
-    return { result: null, error: null };
+    return;
   }
 
-  let result = null,
-    error = null;
   try {
-    result = await firebaseSignOut(auth);
+    await firebaseSignOut(auth);
   } catch (e) {
-    error = e;
+    console.error("Error signing out: ", e);
   }
-  return { result, error };
 }
 
 

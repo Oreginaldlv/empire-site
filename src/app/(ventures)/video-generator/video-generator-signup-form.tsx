@@ -24,6 +24,7 @@ import { Loader2, Wand2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useAuth } from '@/hooks/use-auth';
 
 const formSchema = z.object({
   videoIdea: z.string().min(10, {
@@ -37,6 +38,7 @@ interface VideoGeneratorSignupFormProps {
 }
 
 export function VideoGeneratorSignupForm({ open, onOpenChange }: VideoGeneratorSignupFormProps) {
+  const { isAuthenticated } = useAuth(); // Assuming this is now for generating, not signing up
   const [isLoading, setIsLoading] = useState(false);
   const [script, setScript] = useState('');
   const { toast } = useToast();
@@ -49,6 +51,15 @@ export function VideoGeneratorSignupForm({ open, onOpenChange }: VideoGeneratorS
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!isAuthenticated) {
+      toast({
+        variant: 'destructive',
+        title: 'Authentication Required',
+        description: 'Please sign up or log in to generate a video script.',
+      });
+      return;
+    }
+    
     setIsLoading(true);
     setScript('');
     try {

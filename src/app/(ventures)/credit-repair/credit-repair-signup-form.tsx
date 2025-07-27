@@ -27,13 +27,15 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
+import { signUpUser } from '@/lib/firebase/auth';
+import { useRouter } from 'next/navigation';
 
 const formSchema = z.object({
   fullName: z.string().min(2, { message: 'Full name is required.' }),
   email: z.string().email({ message: 'Please enter a valid email.' }),
   password: z.string().min(8, { message: 'Password must be at least 8 characters.' }),
   phone: z.string().min(10, { message: 'Please enter a valid phone number.' }),
-  creditReport: z.any().refine((file) => file?.length == 1, 'Credit report is required.'),
+  creditReport: z.any().optional(), // Made optional for now
   serviceType: z.enum(['DIY', 'DFY'], { required_error: 'You need to select a service type.' }),
   additionalNotes: z.string().optional(),
 });
@@ -46,6 +48,7 @@ interface CreditRepairSignupFormProps {
 export function CreditRepairSignupForm({ open, onOpenChange }: CreditRepairSignupFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -62,17 +65,29 @@ export function CreditRepairSignupForm({ open, onOpenChange }: CreditRepairSignu
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-    console.log('Form submitted:', values);
-    // TODO: Connect to n8n webhook
-    // https://n8n.oreginal.info/webhook/credit-repair-intake
-    // TODO: Handle auth separately
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    toast({
-      title: 'Success!',
-      description: 'Your information has been submitted.',
+    
+    const result = await signUpUser(values.email, values.password, 'credit-repair', {
+      fullName: values.fullName,
+      phone: values.phone,
+      serviceType: values.serviceType,
+      additionalNotes: values.additionalNotes,
     });
+
+    if (result.error) {
+       toast({
+        variant: 'destructive',
+        title: 'Sign Up Failed',
+        description: result.error.message || 'Could not create account. Please try again.',
+      });
+    } else {
+        toast({
+            title: 'Success!',
+            description: 'Your account has been created.',
+        });
+        router.push('/credit-repair/start');
+    }
+
     setIsLoading(false);
-    if(onOpenChange) onOpenChange(false);
   }
 
   return (
@@ -113,9 +128,9 @@ export function CreditRepairSignupForm({ open, onOpenChange }: CreditRepairSignu
           )} />
           <FormField control={form.control} name="creditReport" render={({ field }) => (
             <FormItem>
-              <FormLabel>Credit Report</FormLabel>
+              <FormLabel>Credit Report (Optional)</FormLabel>
               <FormControl><Input type="file" accept="application/pdf,image/*" {...fileRef} /></FormControl>
-              <FormDescription>Upload your credit report (PDF or Image).</FormDescription>
+              <FormDescription>You can upload your credit report later.</FormDescription>
               <FormMessage />
             </FormItem>
           )} />

@@ -24,11 +24,19 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Loader2 } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email.' }),
   password: z.string().min(8, { message: 'Password must be at least 8 characters.' }),
-  confirmPassword: z.string()
+  confirmPassword: z.string(),
+  venture: z.string({ required_error: "Please select a venture."}),
 }).refine(data => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
@@ -51,7 +59,7 @@ export function SignupForm() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-    const result = await signUpUser(values.email, values.password);
+    const result = await signUpUser(values.email, values.password, values.venture);
 
     if (result.error) {
       console.error('Error signing up:', result.error);
@@ -65,8 +73,6 @@ export function SignupForm() {
             title: 'Success!',
             description: 'Your account has been created.',
         });
-        
-        // TODO: Trigger n8n webhook
         
         router.push('/dashboard');
     }
@@ -116,6 +122,33 @@ export function SignupForm() {
               </FormItem>
             )}
           />
+           <FormField
+              control={form.control}
+              name="venture"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Select a Venture</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Choose your primary venture..." />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="credit-repair">Credit Repair</SelectItem>
+                      <SelectItem value="vboy-empire">VBoy Empire</SelectItem>
+                      <SelectItem value="crm">LeadLoop CRM</SelectItem>
+                      <SelectItem value="video-generator">AI Video Generator</SelectItem>
+                      <SelectItem value="business-builder">AI Business Builder</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
         </CardContent>
         <CardFooter>
           <Button type="submit" disabled={isLoading} className="w-full">

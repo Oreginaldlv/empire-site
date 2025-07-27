@@ -26,6 +26,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
+import { signUpUser } from '@/lib/firebase/auth';
+import { useRouter } from 'next/navigation';
 
 const formSchema = z.object({
   fullName: z.string().min(2, { message: 'Full name is required.' }),
@@ -33,12 +35,12 @@ const formSchema = z.object({
   password: z.string().min(8, { message: 'Password must be at least 8 characters.' }),
   businessName: z.string().min(2, { message: 'Business name is required.' }),
   leadsWanted: z.string().optional(),
-  connectionDetails: z.string().optional(),
 });
 
 export function CrmSignupForm() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -53,15 +55,26 @@ export function CrmSignupForm() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-    console.log('Form submitted:', values);
-    // TODO: Connect to n8n webhook
-    // https://n8n.oreginal.info/webhook/crm-intake
-    // TODO: Handle auth separately
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    toast({
-      title: 'Success!',
-      description: 'Your information has been submitted.',
+    const result = await signUpUser(values.email, values.password, 'crm', {
+        fullName: values.fullName,
+        businessName: values.businessName,
+        leadsWanted: values.leadsWanted,
     });
+
+    if (result.error) {
+       toast({
+        variant: 'destructive',
+        title: 'Sign Up Failed',
+        description: result.error.message || 'Could not create account. Please try again.',
+      });
+    } else {
+        toast({
+            title: 'Success!',
+            description: 'Your account has been created.',
+        });
+        router.push('/dashboard');
+    }
+    
     setIsLoading(false);
   }
 

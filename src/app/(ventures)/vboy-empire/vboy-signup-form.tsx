@@ -28,6 +28,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { signUpUser } from '@/lib/firebase/auth';
+import { useRouter } from 'next/navigation';
+
 
 const contentTypes = [
   { id: 'music', label: 'Music' },
@@ -55,6 +58,8 @@ interface VboySignupFormProps {
 export function VboySignupForm({ open, onOpenChange }: VboySignupFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const router = useRouter();
+
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -71,17 +76,28 @@ export function VboySignupForm({ open, onOpenChange }: VboySignupFormProps) {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-    console.log('Form submitted:', values);
-    // TODO: Connect to n8n webhook
-    // https://n8n.oreginal.info/webhook/vboy-intake
-    // TODO: Handle auth separately
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    toast({
-      title: 'Welcome to the Empire!',
-      description: 'Your information has been submitted.',
+    
+    const result = await signUpUser(values.email, values.password, 'vboy-empire', {
+        fullName: values.fullName,
+        favoriteContentTypes: values.favoriteContentTypes,
+        shippingAddress: values.shippingAddress,
     });
+
+    if (result.error) {
+       toast({
+        variant: 'destructive',
+        title: 'Sign Up Failed',
+        description: result.error.message || 'Could not create account. Please try again.',
+      });
+    } else {
+        toast({
+            title: 'Welcome to the Empire!',
+            description: 'Your account has been created.',
+        });
+        router.push('/dashboard');
+    }
+
     setIsLoading(false);
-    if(onOpenChange) onOpenChange(false);
   }
 
   return (
