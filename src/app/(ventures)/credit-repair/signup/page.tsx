@@ -1,64 +1,15 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { CreditCard } from 'lucide-react';
-import { CreditRepairSignupForm } from '../credit-repair-signup-form';
-import { Dialog } from '@/components/ui/dialog';
-import { useAuth } from '@/hooks/use-auth'; // Import the useAuth hook
-import { Loader2 } from 'lucide-react';
 
-export default function CreditRepairSignupPage() {
-  const [open, setOpen] = useState(true);
+export default function CreditRepairSignupRedirect() {
   const router = useRouter();
-  const { user, profile, loading, isAuthenticated } = useAuth(); // Use the useAuth hook
 
-  // Redirect if user is already authenticated and has a venture
   useEffect(() => {
-    if (!loading && isAuthenticated && profile?.venture) {
-      router.push(`/${profile.venture}/start`); // Redirect to their assigned venture
-    }
-  }, [isAuthenticated, profile, loading, router]);
+    router.replace('/auth?venture=credit-repair');
+  }, [router]);
 
-  const handleOpenChange = (isOpen: boolean) => {
-    if (!isOpen) {
-      setOpen(false);
-      // Allow time for the dialog to close before navigating
-      setTimeout(() => {
-        router.push('/credit-repair'); // Redirect back to the venture page if dialog is closed
-      }, 200);
-    }
-  };
-
-   if (loading || (isAuthenticated && profile?.venture)) {
-    // Show a loading indicator or null while checking auth state or if redirecting
-    return (
-         <div className="flex min-h-screen items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin" />
-        </div>
-    );
-  }
-
-  return (
-    <div className="container mx-auto px-4 py-12">
-      <div className="mx-auto max-w-3xl text-center">
-        <CreditCard className="mx-auto h-12 w-12 text-primary" />
-        <h1 className="mt-4 font-headline text-4xl font-bold tracking-tighter sm:text-5xl">
-          Sign Up for Oreginald Credit
-        </h1>
-        <p className="mt-4 text-muted-foreground md:text-xl">
-          Start your journey to better credit today.
-        </p>
-      </div>
-      <div className="mx-auto mt-12 max-w-4xl">
-         {/* Render the dialog and form only if not loading and user is not already assigned a venture */}
-         {!loading && (!isAuthenticated || !profile?.venture) && (
-            <Dialog open={open} onOpenChange={handleOpenChange}>
-              <CreditRepairSignupForm open={open} onOpenChange={handleOpenChange} />
-            </Dialog>
-         )}
-      </div>
-    </div>
-  );
+  return null; // or a loading spinner
 }
