@@ -5,6 +5,9 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
+import { createUserProfile } from '@/lib/firebase/firestore';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -28,7 +31,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { signUpUser } from '@/lib/firebase/auth';
 import { useRouter } from 'next/navigation';
 
 
@@ -77,27 +79,33 @@ export function VboySignupForm({ open, onOpenChange }: VboySignupFormProps) {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     
-    const result = await signUpUser(values.email, values.password, 'vboy-empire', {
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
+      const user = userCredential.user;
+
+      await createUserProfile(user.uid, {
+        email: user.email,
+        venture: 'vboy-empire',
         fullName: values.fullName,
         favoriteContentTypes: values.favoriteContentTypes,
         shippingAddress: values.shippingAddress,
-    });
+      });
 
-    if (result.error) {
+      toast({
+          title: 'Welcome to the Empire!',
+          description: 'Your account has been created.',
+      });
+      router.push('/dashboard');
+
+    } catch (error: any) {
        toast({
         variant: 'destructive',
         title: 'Sign Up Failed',
-        description: result.error.message || 'Could not create account. Please try again.',
+        description: error.message || 'Could not create account. Please try again.',
       });
-    } else {
-        toast({
-            title: 'Welcome to the Empire!',
-            description: 'Your account has been created.',
-        });
-        router.push('/dashboard');
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   }
 
   return (

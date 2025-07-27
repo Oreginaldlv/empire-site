@@ -21,7 +21,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Wand2 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAuth } from '@/hooks/use-auth';
@@ -32,13 +32,13 @@ const formSchema = z.object({
   }),
 });
 
-interface VideoGeneratorSignupFormProps {
+interface VideoGeneratorFormProps {
   open: boolean;
   onOpenChange?: (open: boolean) => void;
 }
 
-export function VideoGeneratorSignupForm({ open, onOpenChange }: VideoGeneratorSignupFormProps) {
-  const { isAuthenticated } = useAuth(); // Assuming this is now for generating, not signing up
+export function VideoGeneratorSignupForm({ open, onOpenChange }: VideoGeneratorFormProps) {
+  const { isAuthenticated } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [script, setScript] = useState('');
   const { toast } = useToast();

@@ -5,6 +5,9 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
+import { createUserProfile } from '@/lib/firebase/firestore';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -27,7 +30,6 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
-import { signUpUser } from '@/lib/firebase/auth';
 import { useRouter } from 'next/navigation';
 
 const formSchema = z.object({
@@ -66,25 +68,31 @@ export function CreditRepairSignupForm({ open, onOpenChange }: CreditRepairSignu
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     
-    const result = await signUpUser(values.email, values.password, 'credit-repair', {
-      fullName: values.fullName,
-      phone: values.phone,
-      serviceType: values.serviceType,
-      additionalNotes: values.additionalNotes,
-    });
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
+      const user = userCredential.user;
 
-    if (result.error) {
+      await createUserProfile(user.uid, {
+        email: user.email,
+        venture: 'credit-repair',
+        fullName: values.fullName,
+        phone: values.phone,
+        serviceType: values.serviceType,
+        additionalNotes: values.additionalNotes,
+      });
+
+      toast({
+          title: 'Success!',
+          description: 'Your account has been created.',
+      });
+      router.push('/credit-repair/start');
+
+    } catch (error: any) {
        toast({
         variant: 'destructive',
         title: 'Sign Up Failed',
-        description: result.error.message || 'Could not create account. Please try again.',
+        description: error.message || 'Could not create account. Please try again.',
       });
-    } else {
-        toast({
-            title: 'Success!',
-            description: 'Your account has been created.',
-        });
-        router.push('/credit-repair/start');
     }
 
     setIsLoading(false);

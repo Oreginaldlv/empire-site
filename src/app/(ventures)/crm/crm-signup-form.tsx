@@ -5,6 +5,9 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
+import { createUserProfile } from '@/lib/firebase/firestore';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -26,7 +29,6 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
-import { signUpUser } from '@/lib/firebase/auth';
 import { useRouter } from 'next/navigation';
 
 const formSchema = z.object({
@@ -55,27 +57,32 @@ export function CrmSignupForm() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-    const result = await signUpUser(values.email, values.password, 'crm', {
-        fullName: values.fullName,
-        businessName: values.businessName,
-        leadsWanted: values.leadsWanted,
-    });
+    try {
+        const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
+        const user = userCredential.user;
 
-    if (result.error) {
-       toast({
-        variant: 'destructive',
-        title: 'Sign Up Failed',
-        description: result.error.message || 'Could not create account. Please try again.',
-      });
-    } else {
+        await createUserProfile(user.uid, {
+            email: user.email,
+            venture: 'crm',
+            fullName: values.fullName,
+            businessName: values.businessName,
+            leadsWanted: values.leadsWanted,
+        });
+
         toast({
             title: 'Success!',
             description: 'Your account has been created.',
         });
         router.push('/dashboard');
+    } catch (error: any) {
+       toast({
+        variant: 'destructive',
+        title: 'Sign Up Failed',
+        description: error.message || 'Could not create account. Please try again.',
+      });
+    } finally {
+        setIsLoading(false);
     }
-    
-    setIsLoading(false);
   }
 
   return (

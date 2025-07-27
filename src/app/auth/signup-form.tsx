@@ -7,7 +7,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
-import { signupWithEmailAndPassword } from '@/lib/firebase/auth';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 import { createUserProfile } from '@/lib/firebase/firestore';
 
 import { Button } from '@/components/ui/button';
@@ -62,10 +63,10 @@ export function SignupForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     try {
-      const userCredential = await signupWithEmailAndPassword(values.email, values.password);
+      const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
       const user = userCredential.user;
 
-      await createUserProfile(user.uid, user.email, values.venture);
+      await createUserProfile(user.uid, { email: user.email!, venture: values.venture });
 
       toast({
         title: 'Success!',

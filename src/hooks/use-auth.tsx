@@ -8,8 +8,8 @@ import {
   useContext,
   ReactNode,
 } from 'react';
-import { auth } from '@/lib/firebase'; // Import the auth instance
-import { onAuthStateChanged, User } from 'firebase/auth'; // Import from firebase/auth
+import { auth } from '@/lib/firebase';
+import { onAuthStateChanged, User } from 'firebase/auth';
 import { getUserProfile } from '@/lib/firebase/firestore';
 
 
@@ -17,8 +17,9 @@ interface UserProfile {
   uid: string;
   email: string;
   venture: string;
-  createdAt: any; // Use appropriate type for timestamp
+  createdAt: any; 
   subscriptionStatus: string;
+  [key: string]: any; 
 }
 
 interface AuthContextType {
@@ -28,11 +29,11 @@ interface AuthContextType {
   isAuthenticated: boolean;
 }
 
-export const AuthContext = createContext<AuthContextType>({ 
-    user: null, 
+export const AuthContext = createContext<AuthContextType>({
+    user: null,
     profile: null,
     loading: true,
-    isAuthenticated: false 
+    isAuthenticated: false
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -48,7 +49,7 @@ export function AuthProvider({ children }: AuthProviderProps): JSX.Element {
 
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => { // Use the imported auth instance
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setLoading(true);
       if (user) {
         setUser(user);
