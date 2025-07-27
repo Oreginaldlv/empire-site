@@ -8,9 +8,14 @@ import {
   onAuthStateChanged as firebaseOnAuthStateChanged,
   type User,
 } from 'firebase/auth';
-import { auth } from '../firebase';
+import { auth, isFirebaseEnabled } from '../firebase';
 
 export async function signUpUser(email, password) {
+  if (!isFirebaseEnabled()) {
+    console.warn('Firebase is not configured. Sign up is disabled.');
+    return { result: null, error: { message: 'Firebase is not configured.'} };
+  }
+
   let result = null,
     error = null;
   try {
@@ -23,6 +28,10 @@ export async function signUpUser(email, password) {
 }
 
 export async function signInUser(email, password) {
+  if (!isFirebaseEnabled()) {
+    console.warn('Firebase is not configured. Sign in is disabled.');
+    return { result: null, error: { message: 'Firebase is not configured.'} };
+  }
   let result = null,
     error = null;
   try {
@@ -35,6 +44,11 @@ export async function signInUser(email, password) {
 }
 
 export async function signOut() {
+  if (!isFirebaseEnabled()) {
+    console.warn('Firebase is not configured. Sign out is disabled.');
+    return { result: null, error: null };
+  }
+
   let result = null,
     error = null;
   try {
@@ -47,5 +61,9 @@ export async function signOut() {
 
 
 export function onAuthStateChanged(callback: (user: User | null) => void) {
+  if (!isFirebaseEnabled()) {
+    // Return a no-op unsubscribe function
+    return () => {};
+  }
   return firebaseOnAuthStateChanged(auth, callback);
 }

@@ -12,6 +12,7 @@ const firebaseConfig = {
 
 let app: FirebaseApp;
 let auth: Auth;
+let firebaseEnabled = false;
 
 // Check if all required environment variables are present
 if (firebaseConfig.apiKey) {
@@ -21,6 +22,7 @@ if (firebaseConfig.apiKey) {
         app = getApp();
     }
     auth = getAuth(app);
+    firebaseEnabled = true;
 } else {
     console.warn("Firebase API key is missing. Firebase services will be disabled.");
     // Provide no-op or placeholder objects if Firebase is not configured
@@ -28,5 +30,8 @@ if (firebaseConfig.apiKey) {
     auth = {} as Auth;
 }
 
+export function isFirebaseEnabled() {
+    return firebaseEnabled;
+}
 
 export { app, auth };
