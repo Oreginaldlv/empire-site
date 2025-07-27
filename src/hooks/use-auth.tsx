@@ -8,7 +8,7 @@ import {
   useContext,
   ReactNode,
 } from 'react';
-import { auth } from '@/lib/firebase/firebase'; // Import the auth instance
+import { auth } from '@/lib/firebase'; // Import the auth instance
 import { onAuthStateChanged, User } from 'firebase/auth'; // Import from firebase/auth
 import { getUserProfile } from '@/lib/firebase/firestore';
 
@@ -53,7 +53,7 @@ export function AuthProvider({ children }: AuthProviderProps): JSX.Element {
       if (user) {
         setUser(user);
         const userProfile = await getUserProfile(user.uid);
-        setProfile(userProfile);
+        setProfile(userProfile as UserProfile | null);
       } else {
         setUser(null);
         setProfile(null);
