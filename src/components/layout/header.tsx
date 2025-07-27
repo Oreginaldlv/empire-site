@@ -1,8 +1,22 @@
+
+'use client';
+
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/logo';
+import { useAuth } from '@/hooks/use-auth';
+import { signOut } from '@/lib/firebase/auth';
+import { useRouter } from 'next/navigation';
 
 export default function Header() {
+  const { user } = useAuth();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await signOut();
+    router.push('/');
+  };
+  
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
@@ -42,9 +56,23 @@ export default function Header() {
           </Link>
         </nav>
         <div className="flex items-center gap-4">
-          <Button asChild>
-            <Link href="/auth">Sign In</Link>
-          </Button>
+          {user ? (
+            <>
+              <Button variant="ghost" asChild>
+                <Link href="/dashboard">Dashboard</Link>
+              </Button>
+              <Button onClick={handleLogout}>Logout</Button>
+            </>
+          ) : (
+            <>
+              <Button variant="ghost" asChild>
+                <Link href="/auth">Sign In</Link>
+              </Button>
+              <Button asChild>
+                <Link href="/auth">Sign Up</Link>
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </header>
