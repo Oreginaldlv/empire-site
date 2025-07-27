@@ -6,9 +6,10 @@ import {
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
   onAuthStateChanged as firebaseOnAuthStateChanged,
+  getAuth,
   type User,
 } from 'firebase/auth';
-import { auth, isFirebaseEnabled } from '../firebase';
+import { app, isFirebaseEnabled, auth } from '../firebase';
 
 export async function signUpUser(email, password) {
   if (!isFirebaseEnabled()) {

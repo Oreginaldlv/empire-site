@@ -15,7 +15,14 @@ let auth: Auth;
 let firebaseEnabled = false;
 
 // Check if all required environment variables are present
-if (firebaseConfig.apiKey) {
+if (
+  firebaseConfig.apiKey &&
+  firebaseConfig.authDomain &&
+  firebaseConfig.projectId &&
+  firebaseConfig.storageBucket &&
+  firebaseConfig.messagingSenderId &&
+  firebaseConfig.appId
+) {
     if (!getApps().length) {
         app = initializeApp(firebaseConfig);
     } else {
@@ -24,7 +31,7 @@ if (firebaseConfig.apiKey) {
     auth = getAuth(app);
     firebaseEnabled = true;
 } else {
-    console.warn("Firebase API key is missing. Firebase services will be disabled.");
+    console.warn("Firebase configuration is incomplete. Firebase services will be disabled.");
     // Provide no-op or placeholder objects if Firebase is not configured
     app = {} as FirebaseApp;
     auth = {} as Auth;
