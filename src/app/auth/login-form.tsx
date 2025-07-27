@@ -7,7 +7,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
-import { signInUser } from '@/lib/firebase/auth';
+import { signInWithEmailAndPassword } from '@/lib/firebase/auth';
+import { getUserProfile } from '@/lib/firebase/firestore';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -46,23 +47,34 @@ export function LoginForm() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-    const result = await signInUser(values.email, values.password);
+    try {
+      const userCredential = await signInWithEmailAndPassword(values.email, values.password);
+      const user = userCredential.user;
 
-    if (result.error) {
-      console.error('Error signing in:', result.error);
-      toast({
-        variant: 'destructive',
-        title: 'Login Failed',
-        description: result.error.message || 'Please check your credentials and try again.',
-      });
-    } else {
+      const userProfile = await getUserProfile(user.uid);
+
+      if (userProfile?.venture) {
+        // Redirect to venture-specific start page
+        router.push(`/${userProfile.venture}/start`);
+      } else {
+        // If no venture is set in profile, redirect to a default dashboard or profile setup
+        router.push('/dashboard'); // Or a suitable default page
+      }
+
       toast({
         title: 'Success!',
         description: 'You have been signed in.',
       });
-      router.push('/dashboard');
+    } catch (error: any) {
+      console.error('Error signing in:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Login Failed',
+        description: error.message || 'Please check your credentials and try again.',
+      });
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   }
 
   return (

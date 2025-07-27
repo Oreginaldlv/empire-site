@@ -7,7 +7,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
-import { signUpUser } from '@/lib/firebase/auth';
+import { signupWithEmailAndPassword } from '@/lib/firebase/auth';
+import { createUserProfile } from '@/lib/firebase/firestore';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -54,29 +55,36 @@ export function SignupForm() {
       email: '',
       password: '',
       confirmPassword: '',
+      venture: '',
     },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-    const result = await signUpUser(values.email, values.password, values.venture);
+    try {
+      const userCredential = await signupWithEmailAndPassword(values.email, values.password);
+      const user = userCredential.user;
 
-    if (result.error) {
-      console.error('Error signing up:', result.error);
+      await createUserProfile(user.uid, user.email, values.venture);
+
+      toast({
+        title: 'Success!',
+        description: 'Your account has been created.',
+      });
+
+      // Redirect to venture-specific start page
+      router.push(`/${values.venture}/start`);
+
+    } catch (error: any) {
+      console.error('Error signing up:', error);
       toast({
         variant: 'destructive',
         title: 'Sign Up Failed',
-        description: result.error.message || 'Could not create account. Please try again.',
+        description: error.message || 'Could not create account. Please try again.',
       });
-    } else {
-        toast({
-            title: 'Success!',
-            description: 'Your account has been created.',
-        });
-        
-        router.push('/dashboard');
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   }
 
   return (

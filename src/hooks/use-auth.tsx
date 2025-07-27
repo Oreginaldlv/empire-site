@@ -8,11 +8,18 @@ import {
   useContext,
   ReactNode,
 } from 'react';
-import { onAuthStateChanged } from '@/lib/firebase/auth';
+import { auth } from '@/lib/firebase/firebase'; // Import the auth instance
+import { onAuthStateChanged, User } from 'firebase/auth'; // Import from firebase/auth
 import { getUserProfile } from '@/lib/firebase/firestore';
-import type { User } from 'firebase/auth';
-import type { UserProfile } from '@/lib/firebase/firestore';
 
+
+interface UserProfile {
+  uid: string;
+  email: string;
+  venture: string;
+  createdAt: any; // Use appropriate type for timestamp
+  subscriptionStatus: string;
+}
 
 interface AuthContextType {
   user: User | null;
@@ -41,7 +48,7 @@ export function AuthProvider({ children }: AuthProviderProps): JSX.Element {
 
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(async (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => { // Use the imported auth instance
       setLoading(true);
       if (user) {
         setUser(user);
