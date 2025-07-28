@@ -1,15 +1,10 @@
+import SignupForm from '@/app/auth/signup-form'
 
-'use client';
-
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-
-export default function CrmSignupRedirect() {
-  const router = useRouter();
-
-  useEffect(() => {
-    router.replace('/auth?venture=crm');
-  }, [router]);
-
-  return null; // or a loading spinner
+export default function SignupPage() {
+  return (
+    <div className="container">
+      <h1>Join LeadLoop CRM</h1>
+      <SignupForm venture="crm" />
+    </div>
+  )
 }

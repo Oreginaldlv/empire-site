@@ -1,15 +1,10 @@
+import SignupForm from '@/app/auth/signup-form'
 
-'use client';
-
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-
-export default function CreditRepairSignupRedirect() {
-  const router = useRouter();
-
-  useEffect(() => {
-    router.replace('/auth?venture=credit-repair');
-  }, [router]);
-
-  return null; // or a loading spinner
+export default function SignupPage() {
+  return (
+    <div className="container">
+      <h1>Join Credit Repair Empire</h1>
+      <SignupForm venture="credit-repair" />
+    </div>
+  )
 }
