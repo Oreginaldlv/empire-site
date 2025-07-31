@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -21,12 +22,25 @@ import { CardContent, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Loader2 } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
+import { Checkbox } from '@/components/ui/checkbox';
+
+
+const ventures = [
+    { id: 'credit-repair', label: 'Oreginald Credit' },
+    { id: 'vboy-empire', label: 'VBoy Empire' },
+    { id: 'crm', label: 'LeadLoop CRM' },
+    { id: 'video-generator', label: 'NMotion AI' },
+    { id: 'business-builder', label: 'Business Builder' },
+] as const;
 
 
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
   email: z.string().email({ message: 'Please enter a valid email.' }),
   password: z.string().min(8, { message: 'Password must be at least 8 characters.' }),
+  ventures: z.array(z.string()).refine((value) => value.some((item) => item), {
+    message: 'You have to select at least one venture.',
+  }),
 });
 
 export function SignupForm() {
@@ -34,7 +48,7 @@ export function SignupForm() {
   const { toast } = useToast();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const venture = searchParams.get('venture') || 'default';
+  const ventureQueryParam = searchParams.get('venture');
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -42,6 +56,7 @@ export function SignupForm() {
       name: '',
       email: '',
       password: '',
+      ventures: ventureQueryParam ? [ventureQueryParam] : [],
     },
   });
 
@@ -53,7 +68,7 @@ export function SignupForm() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ ...values, venture, type: 'signup' }),
+        body: JSON.stringify({ ...values, type: 'signup' }),
       });
 
       if (!response.ok) {
@@ -66,7 +81,7 @@ export function SignupForm() {
       });
 
       // Redirect to a generic dashboard or a venture-specific page
-      const redirectPath = venture === 'default' ? '/dashboard' : `/${venture}/start`;
+      const redirectPath = values.ventures.length === 1 ? `/${values.ventures[0]}/start` : '/dashboard';
       router.push(redirectPath);
 
     } catch (error: any) {
@@ -123,6 +138,54 @@ export function SignupForm() {
                     <FormMessage />
                 </FormItem>
                 )}
+            />
+             <FormField
+              control={form.control}
+              name="ventures"
+              render={() => (
+                <FormItem>
+                  <div className="mb-4">
+                    <FormLabel className="text-base">Ventures of Interest</FormLabel>
+                    <FormDescription>
+                      Select the services you're interested in.
+                    </FormDescription>
+                  </div>
+                  {ventures.map((item) => (
+                    <FormField
+                      key={item.id}
+                      control={form.control}
+                      name="ventures"
+                      render={({ field }) => {
+                        return (
+                          <FormItem
+                            key={item.id}
+                            className="flex flex-row items-start space-x-3 space-y-0"
+                          >
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value?.includes(item.id)}
+                                onCheckedChange={(checked) => {
+                                  return checked
+                                    ? field.onChange([...(field.value || []), item.id])
+                                    : field.onChange(
+                                        (field.value || []).filter(
+                                          (value) => value !== item.id
+                                        )
+                                      )
+                                }}
+                              />
+                            </FormControl>
+                            <FormLabel className="font-normal">
+                              {item.label}
+                            </FormLabel>
+                          </FormItem>
+                        )
+                      }}
+                    />
+                  ))}
+                  <FormMessage />
+                </FormItem>
+              )}
             />
         </CardContent>
         <CardFooter>
