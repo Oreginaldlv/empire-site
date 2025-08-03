@@ -33,6 +33,7 @@ const ventures = [
     { id: 'crm', label: 'LeadLoop CRM' },
     { id: 'video-generator', label: 'NMotion AI' },
     { id: 'business-builder', label: 'Business Builder' },
+    { id: 'wills-and-trusts', label: 'Empire Wills & Trusts' },
 ] as const;
 
 const formSchema = z.object({

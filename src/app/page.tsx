@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/carousel';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { ArrowRight, CreditCard, Film, Users, Shirt, Rocket } from 'lucide-react';
+import { ArrowRight, CreditCard, Film, Users, Shirt, Rocket, FileText } from 'lucide-react';
 import Autoplay from 'embla-carousel-autoplay';
 
 const ventures = [
@@ -61,6 +61,15 @@ const ventures = [
     image: '/images/Vboy/20250717_1505_Oreginald Logo Design_simple_compose_01k0d6nz3rfh6btq0mnt1vfk4b.png',
     dataAiHint: 'startup rocket',
   },
+    {
+    name: 'Empire Wills & Trusts',
+    title: 'Estate Planning',
+    tagline: 'Secure your legacy for generations to come.',
+    href: '/wills-and-trusts/signup',
+    Icon: FileText,
+    image: 'https://placehold.co/1200x800.png',
+    dataAiHint: 'legal document',
+  },
 ];
 
 export default function Home() {
@@ -68,14 +77,14 @@ export default function Home() {
     <div className="flex flex-col items-center justify-center space-y-12 md:space-y-20 py-12 md:py-24">
       <section className="container mx-auto px-4 text-center">
         <h1 className="font-headline text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl">
-          Fix Your Credit the Smart Way
+          Construct Your Digital Empire
         </h1>
         <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed mt-4">
-          Leverage our AI-powered tools to analyze your credit report, generate effective dispute letters, and take control of your financial future.
+          Leverage our suite of AI-powered tools and services to build, manage, and grow your ventures. Your dynasty starts now.
         </p>
         <div className="mt-8">
             <Button size="lg" asChild>
-                <Link href="/credit-repair/start">Get Started Now</Link>
+                <Link href="/auth">Begin Building</Link>
             </Button>
         </div>
       </section>
