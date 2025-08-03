@@ -7,6 +7,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -46,18 +48,8 @@ export function LoginForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     try {
-      const response = await fetch('https://n8n.oreginald.info/webhook-test/sms-incoming', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ ...values, type: 'login' }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Login failed. Please check your credentials.');
-      }
-
+      await signInWithEmailAndPassword(auth, values.email, values.password);
+      
       toast({
         title: 'Success!',
         description: 'You have been signed in.',
@@ -65,10 +57,16 @@ export function LoginForm() {
       router.push('/dashboard'); 
     } catch (error: any) {
       console.error('Error signing in:', error);
+      let errorMessage = 'Please check your credentials and try again.';
+      if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+          errorMessage = 'Invalid email or password.';
+      } else if (error.message) {
+          errorMessage = error.message;
+      }
       toast({
         variant: 'destructive',
         title: 'Login Failed',
-        description: error.message || 'Please check your credentials and try again.',
+        description: errorMessage,
       });
     } finally {
       setIsLoading(false);

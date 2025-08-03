@@ -7,6 +7,9 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Loader2 } from 'lucide-react';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
+import { createUserProfile } from '@/lib/firebase/firestore';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -29,24 +32,12 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-const ACCEPTED_FILE_TYPES = ['application/pdf'];
-
 const formSchema = z.object({
   fullName: z.string().min(2, { message: 'Full name is required.' }),
   email: z.string().email({ message: 'Please enter a valid email address.' }),
+  password: z.string().min(8, { message: 'Password must be at least 8 characters.' }),
   phone: z.string().min(10, { message: 'Please enter a valid phone number.' }),
-  creditReport: z
-    .any()
-    .refine((files) => files?.length == 1, 'Credit report is required.')
-    .refine(
-      (files) => files?.[0]?.size <= MAX_FILE_SIZE,
-      `Max file size is 10MB.`
-    )
-    .refine(
-      (files) => ACCEPTED_FILE_TYPES.includes(files?.[0]?.type),
-      'Only .pdf files are accepted.'
-    ),
+  creditReport: z.any().optional(), // File upload is optional for now
   plan: z.enum(['DIY', 'DFY'], {
     required_error: 'Please select a plan.',
   }),
@@ -62,6 +53,7 @@ export function CreditIntakeForm() {
     defaultValues: {
       fullName: '',
       email: '',
+      password: '',
       phone: '',
     },
   });
@@ -71,40 +63,65 @@ export function CreditIntakeForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
 
-    const formData = new FormData();
-    formData.append('fullName', values.fullName);
-    formData.append('email', values.email);
-    formData.append('phone', values.phone);
-    formData.append('plan', values.plan);
-    formData.append('creditReport', values.creditReport[0]);
-
     try {
+      // 1. Create user in Firebase Auth
+      const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
+      const user = userCredential.user;
+
+      // 2. Create user profile in Firestore
+      await createUserProfile(user.uid, {
+        email: user.email,
+        venture: 'credit-repair',
+        fullName: values.fullName,
+        phone: values.phone,
+        plan: values.plan,
+      });
+
+      // 3. Send data to n8n webhook (which then sends to Google Sheets)
+      const n8nData = {
+        ...values,
+        uid: user.uid,
+        creditReport: 'Not uploaded during signup', // Placeholder for now
+      };
+      
       const response = await fetch(
-        'https://n8n.oreginal.info/webhook/credit-intake',
+        'https://n8n.oreginald.info/webhook/credit-onboard',
         {
           method: 'POST',
-          body: formData,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(n8nData),
         }
       );
 
       if (!response.ok) {
-        throw new Error('Network response was not ok');
+        throw new Error('Could not send data to our system. Please contact support.');
       }
+      
+      // 4. Send email verification
+      // await sendEmailVerification(user);
 
       toast({
         title: 'Success!',
         description:
-          'Your information has been submitted. We will be in touch shortly.',
+          'Your account has been created. Please check your email to verify your account.',
       });
-      form.reset();
-      router.push('/credit-repair');
-    } catch (error) {
-      console.error('Error submitting form:', error);
+
+      // 5. Redirect to dashboard
+      router.push('/dashboard');
+
+    } catch (error: any) {
+      console.error('Error during sign up:', error);
+      let errorMessage = 'There was a problem with your submission. Please try again.';
+      if (error.code === 'auth/email-already-in-use') {
+        errorMessage = 'This email is already registered. Please log in instead.';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
         variant: 'destructive',
         title: 'Submission Failed',
-        description:
-          'There was a problem submitting your form. Please try again.',
+        description: errorMessage,
       });
     } finally {
       setIsLoading(false);
@@ -149,6 +166,23 @@ export function CreditIntakeForm() {
                 </FormItem>
               )}
             />
+             <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="password"
+                      placeholder="••••••••"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="phone"
@@ -167,12 +201,12 @@ export function CreditIntakeForm() {
               name="creditReport"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Credit Report</FormLabel>
+                  <FormLabel>Credit Report (Optional)</FormLabel>
                   <FormControl>
                     <Input type="file" accept=".pdf" {...fileRef} />
                   </FormControl>
                   <FormDescription>
-                    Upload your credit report (PDF, max 10MB).
+                    You can upload your credit report later from your dashboard.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -204,7 +238,7 @@ export function CreditIntakeForm() {
             />
             <Button type="submit" disabled={isLoading} className="w-full">
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Submit Application
+              Create Account & Submit
             </Button>
           </form>
         </Form>

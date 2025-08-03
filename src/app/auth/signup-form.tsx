@@ -7,6 +7,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
+import { createUserProfile } from '@/lib/firebase/firestore';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -24,7 +27,6 @@ import { Loader2 } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { Checkbox } from '@/components/ui/checkbox';
 
-
 const ventures = [
     { id: 'credit-repair', label: 'Oreginald Credit' },
     { id: 'vboy-empire', label: 'VBoy Empire' },
@@ -32,7 +34,6 @@ const ventures = [
     { id: 'video-generator', label: 'NMotion AI' },
     { id: 'business-builder', label: 'Business Builder' },
 ] as const;
-
 
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -63,33 +64,39 @@ export function SignupForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     try {
-      const response = await fetch('https://n8n.oreginald.info/webhook-test/sms-incoming', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ ...values, type: 'signup' }),
-      });
+      const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
+      const user = userCredential.user;
 
-      if (!response.ok) {
-        throw new Error('Sign up failed. Please try again.');
-      }
+      // For now, we'll just assign the first selected venture.
+      // A more complex system might create multiple profiles or a main profile with multiple venture access roles.
+      const primaryVenture = values.ventures[0];
+
+      await createUserProfile(user.uid, {
+        email: user.email,
+        name: values.name,
+        venture: primaryVenture,
+        ventures: values.ventures, // store all selected ventures
+      });
       
       toast({
         title: 'Welcome to the Empire!',
         description: 'Your account has been created.',
       });
 
-      // Redirect to a generic dashboard or a venture-specific page
-      const redirectPath = values.ventures.length === 1 ? `/${values.ventures[0]}/start` : '/dashboard';
+      // Redirect to a venture-specific start page or a general dashboard
+      const redirectPath = `/dashboard`;
       router.push(redirectPath);
 
     } catch (error: any) {
       console.error('Error signing up:', error);
+      let errorMessage = 'Could not create your account.';
+      if (error.code === 'auth/email-already-in-use') {
+        errorMessage = 'An account with this email already exists.';
+      }
       toast({
         variant: 'destructive',
         title: 'Sign Up Failed',
-        description: error.message || 'Could not create your account.',
+        description: errorMessage,
       });
     } finally {
       setIsLoading(false);
