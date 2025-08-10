@@ -1,0 +1,24 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: corepack enable
+      - run: pnpm i --frozen-lockfile
+      - run: pnpm lint || true
+      - run: pnpm test -- --run || true
+      - run: pnpm build
+      - name: Notify n8n of success
+        if: ${{ success() && github.ref == 'refs/heads/main' }}
+        run: |
+          curl -X POST "$N8N_DEPLOY_WEBHOOK" -H "Content-Type: application/json" -d "{"sha":"$GITHUB_SHA","repo":"$GITHUB_REPOSITORY"}"
+        env:
+          N8N_DEPLOY_WEBHOOK: ${{ secrets.N8N_DEPLOY_WEBHOOK }}

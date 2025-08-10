@@ -1,0 +1,17 @@
+{
+  "venture": "credit-repair",
+  "name": "Oreginald Credit",
+  "slug": "credit-repair",
+  "description": "Monthly credit repair service powered by Metro 2 workflows.",
+  "price": 14.95,
+  "interval": "month",
+  "stripe": {
+    "productId": "REPLACE_BY_N8N",
+    "priceId": "REPLACE_BY_N8N"
+  },
+  "features": [
+    "Metro 2 disputes",
+    "Monthly analysis",
+    "Email support"
+  ]
+}
