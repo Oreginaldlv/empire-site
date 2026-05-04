@@ -20,7 +20,7 @@ firestore-debug.log
 
 # system
 .DS_Store
-Thumbs.db
+Thumbs.db 
 
 # environment variables
 .env
