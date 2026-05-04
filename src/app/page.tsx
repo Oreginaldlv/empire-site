@@ -152,6 +152,26 @@ export default function Home() {
           <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 z-10 hidden md:flex" />
         </Carousel>
       </section>
+
+      <section className="container mx-auto px-4">
+        <div className="mx-auto max-w-4xl rounded-lg border bg-card p-8 text-center shadow-lg md:p-12">
+          <h2 className="font-headline text-3xl font-bold tracking-tight md:text-4xl">
+            Need More Customers Without Chasing Every Lead Manually?
+          </h2>
+          <p className="mx-auto mt-4 max-w-2xl text-muted-foreground md:text-lg/relaxed">
+            We build automation systems for small businesses that stop missed leads, speed up
+            follow-up, reduce manual work, and help turn inquiries into booked customers.
+          </p>
+          <div className="mt-8">
+            <Button size="lg" asChild>
+              <Link href="/automation-systems">
+                Get an Automation System
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

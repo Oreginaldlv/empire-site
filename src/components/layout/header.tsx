@@ -44,6 +44,12 @@ export default function Header() {
             CRM
           </Link>
           <Link
+            href="/automation-systems"
+            className="text-muted-foreground transition-colors hover:text-foreground"
+          >
+            Automation Systems
+          </Link>
+          <Link
             href="/video-generator"
             className="text-muted-foreground transition-colors hover:text-foreground"
           >
