@@ -92,9 +92,9 @@ const serviceCards = [
     icon: ShieldCheck,
   },
   {
-    title: "Customer Dashboard Coming Soon",
+    title: "Customer Re-Activation",
     description:
-      "A future dashboard will make it easier to track activity, responses, and follow-up in one place.",
+      "Reconnect with old leads and past customers using simple timed outreach.",
     icon: CheckCircle2,
   },
 ];
@@ -312,7 +312,7 @@ export default function Page() {
                   className="bg-amber-400 text-slate-950 hover:bg-amber-300"
                   onClick={() => scrollToLeadForm()}
                 >
-                  Start My LeadFlow Setup
+                  Book a Free Automation Audit
                   <ArrowRight className="h-4 w-4" />
                 </Button>
                 <Button
@@ -320,10 +320,10 @@ export default function Page() {
                   variant="outline"
                   className="border-slate-700 bg-transparent text-white hover:bg-slate-900"
                   onClick={() =>
-                    scrollToLeadForm("I would like to book a demo before getting started.")
+                    scrollToLeadForm("I am interested in the $297 setup and would like next steps.")
                   }
                 >
-                  Book a Demo
+                  Get Started for $297
                 </Button>
               </div>
               <div className="mt-8 grid gap-4 text-sm text-slate-300 sm:grid-cols-3">
@@ -398,7 +398,7 @@ export default function Page() {
                     className="w-full bg-amber-400 text-slate-950 hover:bg-amber-300"
                   >
                     <a href={stripePaymentLink} rel="noreferrer" target="_blank">
-                      Pay $297 Setup Fee
+                      Get Started for $297
                     </a>
                   </Button>
                 ) : (
@@ -407,7 +407,7 @@ export default function Page() {
                     className="w-full bg-amber-400 text-slate-950"
                     disabled
                   >
-                    Pay $297 Setup Fee
+                    Get Started for $297
                   </Button>
                 )}
                 <p className="mt-3 text-sm text-slate-400">
@@ -535,7 +535,7 @@ export default function Page() {
                     className="w-full bg-amber-400 text-slate-950 hover:bg-amber-300"
                   >
                     <a href={stripePaymentLink} rel="noreferrer" target="_blank">
-                      Pay with Stripe
+                      Get Started for $297
                     </a>
                   </Button>
                 ) : (
@@ -544,7 +544,7 @@ export default function Page() {
                     className="w-full bg-amber-400 text-slate-950"
                     disabled
                   >
-                    Pay with Stripe
+                    Get Started for $297
                   </Button>
                 )}
               </div>
@@ -730,11 +730,10 @@ export default function Page() {
                     size="lg"
                     type="submit"
                   >
-                    {isSubmitting ? "Submitting..." : "Start My LeadFlow Setup"}
+                    {isSubmitting ? "Submitting..." : "Book a Free Automation Audit"}
                   </Button>
                   <p className="text-sm text-slate-500">
-                    This form submits JSON to the lead webhook configured in
-                    `NEXT_PUBLIC_LEADFORM_WEBHOOK_URL`.
+                    Use this form to request a free audit or ask for the setup link.
                   </p>
                 </div>
               </form>
@@ -742,7 +741,7 @@ export default function Page() {
           </div>
         </section>
 
-        <section id="what-happens-next" className="bg-slate-950 text-white">
+        <section id="how-it-works" className="bg-slate-950 text-white">
           <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
             <div className="max-w-3xl">
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-amber-200">
@@ -798,8 +797,7 @@ export default function Page() {
               Ready to install a better lead capture and follow-up system?
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-lg leading-8 text-slate-600">
-              Start with the form if you want to talk through your setup. If you are
-              ready to move now, use the Stripe payment link for the $297 setup fee.
+              Start with the form if you want to talk through your setup. If you are ready to move now, use the setup payment link for the $297 setup fee.
             </p>
             <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
               <Button
@@ -807,16 +805,16 @@ export default function Page() {
                 className="bg-slate-950 text-white hover:bg-slate-800"
                 onClick={() => scrollToLeadForm()}
               >
-                Start My LeadFlow Setup
+                Book a Free Automation Audit
               </Button>
               <Button
                 size="lg"
                 variant="outline"
                 onClick={() =>
-                  scrollToLeadForm("I would like to book a demo before getting started.")
+                  scrollToLeadForm("I am interested in the $297 setup and would like next steps.")
                 }
               >
-                Book a Demo
+                Get Started for $297
               </Button>
             </div>
           </div>
