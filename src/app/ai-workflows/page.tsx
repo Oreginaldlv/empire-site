@@ -34,6 +34,11 @@ const initialFormData = {
   website: "",
   businessType: "",
   biggestProblem: "",
+  leadSources: "",
+  desiredAutomation: "",
+  currentTools: "",
+  bestContactMethod: "",
+  urgency: "",
   message: "",
 };
 
@@ -166,8 +171,36 @@ function validateLeadForm(formData: LeadFormData): FieldErrors {
     errors.email = "Enter a valid email address.";
   }
 
+  if (!formData.phone.trim()) {
+    errors.phone = "Phone number is required.";
+  }
+
+  if (!formData.businessType.trim()) {
+    errors.businessType = "Business type is required.";
+  }
+
   if (!formData.biggestProblem.trim()) {
     errors.biggestProblem = "Select your biggest problem.";
+  }
+
+  if (!formData.leadSources.trim()) {
+    errors.leadSources = "Tell us where your leads come from.";
+  }
+
+  if (!formData.desiredAutomation.trim()) {
+    errors.desiredAutomation = "Select the automation you want built.";
+  }
+
+  if (!formData.currentTools.trim()) {
+    errors.currentTools = "Tell us what tools you currently use.";
+  }
+
+  if (!formData.bestContactMethod.trim()) {
+    errors.bestContactMethod = "Select the best contact method.";
+  }
+
+  if (!formData.urgency.trim()) {
+    errors.urgency = "Select when you want setup.";
   }
 
   return errors;
@@ -555,14 +588,13 @@ export default function Page() {
               className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8"
             >
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">
-                Lead capture form
+                Detailed automation intake form
               </p>
               <h2 className="mt-3 text-3xl font-semibold text-slate-950 sm:text-4xl">
-                Tell us about your business and your biggest lead problem.
+                Tell us what to build, where your leads come from, and how your business works.
               </h2>
               <p className="mt-4 text-sm leading-7 text-slate-600">
-                Use this form to request setup or ask for a demo first. Required
-                fields are full name, business name, email, and biggest problem.
+                This is the setup intake after the sales CTA. It collects enough detail to qualify the lead, route the request, and prepare the automation workflow without removing the existing webhook submission/payment flow.
               </p>
 
               <form className="mt-8 space-y-5" onSubmit={handleSubmit} noValidate>
@@ -624,7 +656,7 @@ export default function Page() {
 
                   <div>
                     <label className="mb-2 block text-sm font-medium text-slate-700" htmlFor="phone">
-                      Phone
+                      Phone *
                     </label>
                     <Input
                       autoComplete="tel"
@@ -635,6 +667,9 @@ export default function Page() {
                       type="tel"
                       value={formData.phone}
                     />
+                    {fieldErrors.phone ? (
+                      <p className="mt-2 text-sm text-red-600">{fieldErrors.phone}</p>
+                    ) : null}
                   </div>
 
                   <div>
@@ -657,7 +692,7 @@ export default function Page() {
                       className="mb-2 block text-sm font-medium text-slate-700"
                       htmlFor="businessType"
                     >
-                      Business type
+                      Business type / industry *
                     </label>
                     <Input
                       id="businessType"
@@ -666,6 +701,9 @@ export default function Page() {
                       placeholder="HVAC, med spa, law firm, dental, roofing..."
                       value={formData.businessType}
                     />
+                    {fieldErrors.businessType ? (
+                      <p className="mt-2 text-sm text-red-600">{fieldErrors.businessType}</p>
+                    ) : null}
                   </div>
                 </div>
 
@@ -697,14 +735,130 @@ export default function Page() {
                 </div>
 
                 <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700" htmlFor="leadSources">
+                    Current lead sources *
+                  </label>
+                  <Textarea
+                    id="leadSources"
+                    name="leadSources"
+                    onChange={handleFieldChange}
+                    placeholder="Phone calls, website form, Facebook, Instagram, Google Business Profile, text messages, email, referrals..."
+                    rows={3}
+                    value={formData.leadSources}
+                  />
+                  {fieldErrors.leadSources ? (
+                    <p className="mt-2 text-sm text-red-600">{fieldErrors.leadSources}</p>
+                  ) : null}
+                </div>
+
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <div>
+                    <label
+                      className="mb-2 block text-sm font-medium text-slate-700"
+                      htmlFor="desiredAutomation"
+                    >
+                      Desired automation *
+                    </label>
+                    <select
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      id="desiredAutomation"
+                      name="desiredAutomation"
+                      onChange={handleFieldChange}
+                      value={formData.desiredAutomation}
+                    >
+                      <option value="">Select desired automation</option>
+                      <option value="Missed-call text-back">Missed-call text-back</option>
+                      <option value="Lead capture and qualification">Lead capture and qualification</option>
+                      <option value="Appointment reminders">Appointment reminders</option>
+                      <option value="Review requests">Review requests</option>
+                      <option value="Follow-up sequence">Follow-up sequence</option>
+                      <option value="Customer reactivation">Customer reactivation</option>
+                      <option value="CRM or Google Sheets tracking">CRM or Google Sheets tracking</option>
+                      <option value="Not sure yet">Not sure yet</option>
+                    </select>
+                    {fieldErrors.desiredAutomation ? (
+                      <p className="mt-2 text-sm text-red-600">{fieldErrors.desiredAutomation}</p>
+                    ) : null}
+                  </div>
+
+                  <div>
+                    <label
+                      className="mb-2 block text-sm font-medium text-slate-700"
+                      htmlFor="urgency"
+                    >
+                      Urgency / setup timing *
+                    </label>
+                    <select
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      id="urgency"
+                      name="urgency"
+                      onChange={handleFieldChange}
+                      value={formData.urgency}
+                    >
+                      <option value="">Select timing</option>
+                      <option value="ASAP">ASAP</option>
+                      <option value="This week">This week</option>
+                      <option value="2-4 weeks">2-4 weeks</option>
+                      <option value="1-3 months">1-3 months</option>
+                      <option value="Just researching">Just researching</option>
+                    </select>
+                    {fieldErrors.urgency ? (
+                      <p className="mt-2 text-sm text-red-600">{fieldErrors.urgency}</p>
+                    ) : null}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700" htmlFor="currentTools">
+                    Current tools used *
+                  </label>
+                  <Textarea
+                    id="currentTools"
+                    name="currentTools"
+                    onChange={handleFieldChange}
+                    placeholder="Google Calendar, Gmail, Google Sheets, CRM, booking app, Stripe, Square, phone system, website forms..."
+                    rows={3}
+                    value={formData.currentTools}
+                  />
+                  {fieldErrors.currentTools ? (
+                    <p className="mt-2 text-sm text-red-600">{fieldErrors.currentTools}</p>
+                  ) : null}
+                </div>
+
+                <div>
+                  <label
+                    className="mb-2 block text-sm font-medium text-slate-700"
+                    htmlFor="bestContactMethod"
+                  >
+                    Best contact method *
+                  </label>
+                  <select
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    id="bestContactMethod"
+                    name="bestContactMethod"
+                    onChange={handleFieldChange}
+                    value={formData.bestContactMethod}
+                  >
+                    <option value="">Select best contact method</option>
+                    <option value="Phone call">Phone call</option>
+                    <option value="Text message">Text message</option>
+                    <option value="Email">Email</option>
+                    <option value="Any method">Any method</option>
+                  </select>
+                  {fieldErrors.bestContactMethod ? (
+                    <p className="mt-2 text-sm text-red-600">{fieldErrors.bestContactMethod}</p>
+                  ) : null}
+                </div>
+
+                <div>
                   <label className="mb-2 block text-sm font-medium text-slate-700" htmlFor="message">
-                    Message
+                    Notes or special instructions
                   </label>
                   <Textarea
                     id="message"
                     name="message"
                     onChange={handleFieldChange}
-                    placeholder="Tell us how leads currently come in, how your team handles them, or say if you want a demo first."
+                    placeholder="Tell us what currently happens after a new lead comes in, what should be automated, or anything special we need to know before setup."
                     rows={5}
                     value={formData.message}
                   />
