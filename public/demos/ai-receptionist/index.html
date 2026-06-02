@@ -1,0 +1,472 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI Receptionist Demo: Never Miss Another Customer</title>
+  <style>
+    :root {
+      --bg: #f5f1e8;
+      --ink: #181818;
+      --muted: #5e5a52;
+      --card: #fffaf0;
+      --white: #ffffff;
+      --line: #e0d5c3;
+      --gold: #f2bd4b;
+      --green: #147a3d;
+      --green-bg: #e9f8ef;
+      --blue: #1d4ed8;
+      --shadow: 0 20px 60px rgba(22, 18, 12, .14);
+      --radius: 24px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: radial-gradient(circle at top left, #fff8df 0, transparent 34%), var(--bg);
+      color: var(--ink);
+    }
+    .page {
+      width: min(1180px, calc(100% - 36px));
+      margin: 0 auto;
+      padding: 26px 0 40px;
+    }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 900;
+      font-size: clamp(20px, 2.2vw, 30px);
+    }
+    .logo {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: #111;
+      color: white;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+    }
+    .pill {
+      background: #111;
+      color: #fff;
+      border-radius: 999px;
+      padding: 12px 18px;
+      font-weight: 800;
+      font-size: clamp(15px, 1.5vw, 18px);
+      white-space: nowrap;
+    }
+    .hero {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: clamp(24px, 4vw, 48px);
+      box-shadow: var(--shadow);
+      margin-bottom: 22px;
+    }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #fff1bf;
+      border: 1px solid #e8c860;
+      color: #392a04;
+      border-radius: 999px;
+      padding: 9px 14px;
+      font-weight: 900;
+      font-size: 16px;
+      margin-bottom: 16px;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(42px, 7vw, 86px);
+      line-height: .94;
+      letter-spacing: -0.055em;
+      max-width: 920px;
+    }
+    .subhead {
+      max-width: 870px;
+      color: var(--muted);
+      font-size: clamp(21px, 2.5vw, 32px);
+      line-height: 1.22;
+      margin: 22px 0 0;
+      font-weight: 700;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1.04fr .96fr;
+      gap: 22px;
+      align-items: start;
+    }
+    .card {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: clamp(20px, 3vw, 30px);
+    }
+    h2 {
+      margin: 0 0 14px;
+      font-size: clamp(28px, 3vw, 42px);
+      line-height: 1;
+      letter-spacing: -0.035em;
+    }
+    .small {
+      color: var(--muted);
+      font-size: 19px;
+      line-height: 1.35;
+      margin: 0 0 18px;
+      font-weight: 650;
+    }
+    label {
+      display: block;
+      font-weight: 900;
+      font-size: 17px;
+      margin: 15px 0 6px;
+    }
+    input, select, textarea {
+      width: 100%;
+      border: 2px solid #d8cbb8;
+      background: #fffdfa;
+      color: var(--ink);
+      border-radius: 14px;
+      padding: 14px 14px;
+      font-size: 19px;
+      font-weight: 700;
+      outline: none;
+    }
+    textarea { min-height: 92px; resize: vertical; }
+    input:focus, select:focus, textarea:focus { border-color: #111; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    button, .button {
+      appearance: none;
+      border: 0;
+      border-radius: 16px;
+      padding: 16px 18px;
+      background: #111;
+      color: #fff;
+      font-size: 21px;
+      font-weight: 950;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 18px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+    }
+    button.secondary { background: #f2bd4b; color: #19140b; }
+    .status-stack { display: grid; gap: 14px; }
+    .panel {
+      border-radius: 20px;
+      border: 1px solid var(--line);
+      background: var(--card);
+      padding: 20px;
+      opacity: .42;
+      transform: translateY(6px);
+      transition: opacity .35s ease, transform .35s ease;
+    }
+    .panel.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .panel-title {
+      font-size: 22px;
+      font-weight: 950;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .badge {
+      display: inline-grid;
+      place-items: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      background: #111;
+      color: #fff;
+      font-size: 17px;
+      flex: 0 0 auto;
+    }
+    .message {
+      background: #fff;
+      border: 1px solid #e5ded2;
+      border-radius: 16px;
+      padding: 14px;
+      font-size: 18px;
+      line-height: 1.35;
+      font-weight: 700;
+      color: #28231c;
+      white-space: pre-line;
+    }
+    .success-screen {
+      display: none;
+      background: var(--green-bg);
+      border: 2px solid #76c792;
+      color: #0e4c28;
+      border-radius: 20px;
+      padding: 22px;
+      margin-top: 18px;
+    }
+    .success-screen h3 {
+      margin: 0 0 8px;
+      font-size: 31px;
+      line-height: 1;
+    }
+    .sheet {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      overflow: hidden;
+      border-radius: 14px;
+      font-size: 14px;
+      font-weight: 800;
+    }
+    .sheet th, .sheet td {
+      border: 1px solid #e8e0d4;
+      text-align: left;
+      padding: 9px;
+      vertical-align: top;
+    }
+    .sheet th { background: #f4eadb; color: #5e4c36; }
+    .sheet .new { color: var(--green); font-weight: 950; }
+    .demo-controls {
+      position: sticky;
+      bottom: 14px;
+      z-index: 10;
+      margin: 24px auto 0;
+      max-width: 720px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      background: rgba(255, 255, 255, .88);
+      border: 1px solid var(--line);
+      backdrop-filter: blur(12px);
+      box-shadow: var(--shadow);
+      border-radius: 22px;
+      padding: 12px;
+    }
+    .demo-controls button { margin: 0; font-size: 17px; padding: 13px 14px; border-radius: 14px; }
+    .offer {
+      margin-top: 22px;
+      background: #111;
+      color: white;
+      border-radius: var(--radius);
+      padding: clamp(24px, 4vw, 42px);
+      box-shadow: var(--shadow);
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 24px;
+      align-items: center;
+    }
+    .offer h2 { color: white; }
+    .offer p { margin: 0; font-size: clamp(19px, 2vw, 25px); color: #e8e8e8; font-weight: 750; line-height: 1.25; }
+    .price {
+      background: var(--gold);
+      color: #111;
+      border-radius: 22px;
+      padding: 22px;
+      text-align: center;
+      min-width: 280px;
+    }
+    .price strong { display: block; font-size: clamp(36px, 4vw, 56px); line-height: .95; letter-spacing: -0.04em; }
+    .price span { font-size: 22px; font-weight: 950; }
+    .caption {
+      position: fixed;
+      left: 50%;
+      bottom: 92px;
+      transform: translateX(-50%);
+      width: min(980px, calc(100% - 32px));
+      background: rgba(17,17,17,.92);
+      color: #fff;
+      border-radius: 18px;
+      padding: 16px 22px;
+      text-align: center;
+      font-size: clamp(22px, 2.6vw, 36px);
+      line-height: 1.1;
+      font-weight: 950;
+      box-shadow: 0 18px 50px rgba(0,0,0,.25);
+      display: none;
+      z-index: 20;
+    }
+    .caption.show { display: block; }
+    @media (max-width: 880px) {
+      .grid, .offer, .row { grid-template-columns: 1fr; }
+      .topbar { align-items: flex-start; flex-direction: column; }
+      .price { min-width: 0; }
+      .demo-controls { flex-direction: column; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      * { transition: none !important; scroll-behavior: auto !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="topbar">
+      <div class="brand"><div class="logo">OE</div> Original Empire</div>
+      <div class="pill">AI Receptionist Demo</div>
+    </div>
+
+    <section class="hero" id="problem">
+      <div class="eyebrow">60–90 second sales demo</div>
+      <h1>AI Receptionist Demo: Never Miss Another Customer</h1>
+      <p class="subhead">Small businesses lose money when calls, quote requests, and follow-ups get missed.</p>
+    </section>
+
+    <section class="grid" id="demo">
+      <div class="card">
+        <h2>Customer Request</h2>
+        <p class="small">Generic demo for restaurants, caterers, HVAC, barbers, cleaners, and auto shops.</p>
+        <form id="leadForm">
+          <div class="row">
+            <div>
+              <label>Name</label>
+              <input name="name" value="Marcus Johnson" required>
+            </div>
+            <div>
+              <label>Phone</label>
+              <input name="phone" value="702-555-0184" required>
+            </div>
+          </div>
+          <label>Email</label>
+          <input name="email" value="marcus@example.com" required>
+          <div class="row">
+            <div>
+              <label>Business Type</label>
+              <select name="businessType">
+                <option selected>Restaurant / Caterer</option>
+                <option>HVAC</option>
+                <option>Barber</option>
+                <option>Cleaning Company</option>
+                <option>Auto Shop</option>
+              </select>
+            </div>
+            <div>
+              <label>Preferred Callback</label>
+              <input name="callback" value="Today after 3 PM">
+            </div>
+          </div>
+          <label>What do you need?</label>
+          <textarea name="request">Catering for 40 people this Saturday. Need pricing for chicken, sides, drinks, and delivery.</textarea>
+          <button type="submit">Send Request</button>
+        </form>
+        <div id="success" class="success-screen">
+          <h3>Thanks, Marcus. Your request was received.</h3>
+          <p class="small">Someone will follow up shortly.</p>
+        </div>
+      </div>
+
+      <div class="status-stack">
+        <div class="card">
+          <h2>What the system does</h2>
+          <p class="small">Captures the lead, asks the right questions, notifies the owner, saves the lead, and moves the customer toward booking.</p>
+        </div>
+
+        <div class="panel" id="aiPanel">
+          <div class="panel-title"><span class="badge">1</span>AI / n8n processes request</div>
+          <div class="message">Lead received. Request type identified. Owner alert and lead tracker update prepared.</div>
+        </div>
+
+        <div class="panel" id="alertPanel">
+          <div class="panel-title"><span class="badge">2</span>Owner gets instant alert</div>
+          <div class="message">NEW CUSTOMER LEAD
+Name: Marcus Johnson
+Phone: 702-555-0184
+Request: Catering for 40 people
+Callback: Today after 3 PM
+Action: Call or send quote.</div>
+        </div>
+
+        <div class="panel" id="sheetPanel">
+          <div class="panel-title"><span class="badge">3</span>Lead saved in tracker</div>
+          <table class="sheet">
+            <thead><tr><th>Name</th><th>Request</th><th>Status</th><th>Next Step</th></tr></thead>
+            <tbody><tr><td>Marcus Johnson</td><td>Catering / quote request</td><td class="new">New Lead</td><td>Follow up today</td></tr></tbody>
+          </table>
+        </div>
+
+        <div class="panel" id="bookingPanel">
+          <div class="panel-title"><span class="badge">4</span>Booking / payment step</div>
+          <div class="message">Send quote, book a call, or send deposit/payment link.</div>
+          <button class="secondary" type="button">Send Booking / Deposit Link</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="offer" id="close">
+      <div>
+        <h2>Installed for your business</h2>
+        <p>I can install this for your business so leads get captured, owners get notified, follow-up does not get forgotten, and more customers move toward booking.</p>
+      </div>
+      <div class="price"><strong>$297</strong><span>setup + $49/month</span></div>
+    </section>
+
+    <div class="demo-controls">
+      <button type="button" id="runDemo">Run Demo Animation</button>
+      <button type="button" class="secondary" id="resetDemo">Reset</button>
+    </div>
+  </div>
+
+  <div id="caption" class="caption"></div>
+
+  <script>
+    const captions = [
+      { t: 0, text: "Small businesses lose money when calls, quote requests, and follow-ups get missed." },
+      { t: 3000, text: "This AI receptionist captures the lead and asks the right questions." },
+      { t: 6500, text: "The owner gets notified instantly." },
+      { t: 9800, text: "The lead is saved, so it does not get lost." },
+      { t: 13000, text: "The next step is ready: quote, booking, or payment link." },
+      { t: 16500, text: "Installed for $297 setup and $49/month. Reply “demo”." }
+    ];
+
+    const panels = ["aiPanel", "alertPanel", "sheetPanel", "bookingPanel"];
+    const caption = document.getElementById("caption");
+
+    function showCaption(text) {
+      caption.textContent = text;
+      caption.classList.add("show");
+    }
+
+    function resetDemo() {
+      document.getElementById("success").style.display = "none";
+      panels.forEach(id => document.getElementById(id).classList.remove("active"));
+      caption.classList.remove("show");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    async function runDemo() {
+      resetDemo();
+      document.getElementById("problem").scrollIntoView({ behavior: "smooth", block: "start" });
+      captions.forEach(c => setTimeout(() => showCaption(c.text), c.t));
+      setTimeout(() => document.getElementById("demo").scrollIntoView({ behavior: "smooth", block: "start" }), 2700);
+      setTimeout(() => {
+        document.getElementById("success").style.display = "block";
+        document.getElementById("aiPanel").classList.add("active");
+      }, 5200);
+      setTimeout(() => document.getElementById("alertPanel").classList.add("active"), 7800);
+      setTimeout(() => document.getElementById("sheetPanel").classList.add("active"), 10800);
+      setTimeout(() => document.getElementById("bookingPanel").classList.add("active"), 13800);
+      setTimeout(() => document.getElementById("close").scrollIntoView({ behavior: "smooth", block: "center" }), 15800);
+    }
+
+    document.getElementById("leadForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      document.getElementById("success").style.display = "block";
+      panels.forEach(id => document.getElementById(id).classList.add("active"));
+      document.getElementById("success").scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+    document.getElementById("runDemo").addEventListener("click", runDemo);
+    document.getElementById("resetDemo").addEventListener("click", resetDemo);
+  </script>
+</body>
+</html>
